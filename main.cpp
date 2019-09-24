@@ -28,7 +28,10 @@ int clamp(int min, int max, int value)
     return value;
 }
 
-
+float campMin(int min, float value){
+    if(value < min ) return min;
+    return value;
+}
 
 Point soustraction(Point vecteur1, Point vecteur2){
     return Point(vecteur2.x-vecteur1.x, vecteur2.y-vecteur1.y , vecteur2.z-vecteur1.z);
@@ -41,7 +44,7 @@ Point normalisation(Point vecteur){
     return Point(vecteur.x / norme(vecteur),vecteur.y / norme(vecteur), vecteur.z / norme(vecteur) );
 }
 
-QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere){
+QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere, Point lumiere2){
  QColor c;
     for(int i =0 ; i < 1000; ++i){
          for(int j =0 ; j < 1000; ++j){
@@ -53,24 +56,23 @@ QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere){
                     Point intersectionv(i,j,t);
                     Point vecteurVersLumire = normalisation( soustraction(intersectionv,lumiere ) );
                     Point vercteurNormal = normalisation(soustraction(it->centre ,intersectionv) );
+                    Point vecteurVersLumiere2 = normalisation( soustraction(intersectionv,lumiere2 ) );
 
-                    int calcul = (int) (   (1/(t*t) * (produitScalaire(vecteurVersLumire ,vercteurNormal) * 10000000 ) ));
+                    float impactLumineuse = produitScalaire(vecteurVersLumire ,vercteurNormal);
+                    float impactLumineuse2 = produitScalaire(vecteurVersLumiere2 ,vercteurNormal);
 
-//                    qInfo() << produitScalaire(vecteurVersLumire ,vercteurNormal) << " produitScalie";
-//                    qInfo() << 1/(t*t) << " 1/t*t";
-//                    qInfo() << calcul;
-                    calcul = clamp(1,255,calcul);
-                    c.setRgb( calcul,calcul,calcul);
+                    //float impactLumineuseSomme  = campMin(0,(impactLumineuse+impactLumineuse2));
 
-                    //qInfo() << calcul;
-                    //c.setRgb( 128,0,128);
+                    int calcul = (int) (   (1/(t*t) * ( impactLumineuse * 10000000 ) ));
+                    int calcul2 = (int) (   (1/(t*t) * ( impactLumineuse2 * 10000000 ) ));
+                    int finalCalcul =  clamp(0,255,calcul);
+                    c.setRgb( finalCalcul ,finalCalcul ,finalCalcul);
                 }else{
                     c.setRgb(0,0,0);
                 }
                 image.setPixelColor(i,j,image.pixelColor(i,j).rgb()+c.rgba());
             }
          }
-
     }
     return image;
 }
@@ -84,7 +86,7 @@ int main(int argc, char *argv[])
     QImage image(1000,1000, QImage::Format_RGB888);
     QLabel myLabel(&w);
 
-    Sphere sphere(200,Point(500,150,400));
+    Sphere sphere(100,Point(500,150,400));
     //Sphere sphere4(200,Point(250,250,400));
     Sphere sphere1(100,Point(50,100,200));
     Sphere sphere3(100,Point(500,500,200));
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
     listSphere.push_back(sphere3);
     //listSphere.push_back(sphere4);
 
-   image = setImage(image,listSphere, Point(250,450,10));
+   image = setImage(image,listSphere, Point(250,300,400),Point(800,800,10));
    myLabel.setPixmap(QPixmap::fromImage(image));
    myLabel.setFixedHeight(1000);
    myLabel.setFixedWidth(1000);
