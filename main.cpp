@@ -55,17 +55,38 @@ QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere, Point 
                 if(t > 0){
                     Point intersectionv(i,j,t);
                     Point vecteurVersLumire = normalisation( soustraction(intersectionv,lumiere ) );
+
                     Point vercteurNormal = normalisation(soustraction(it->centre ,intersectionv) );
                     Point vecteurVersLumiere2 = normalisation( soustraction(intersectionv,lumiere2 ) );
 
                     float impactLumineuse = produitScalaire(vecteurVersLumire ,vercteurNormal);
                     float impactLumineuse2 = produitScalaire(vecteurVersLumiere2 ,vercteurNormal);
 
+                    float t1 = intersection(*it,RayonLumineux(vecteurVersLumire,lumiere)).value_or(0);
+                    float t2 = intersection(*it, RayonLumineux(vecteurVersLumiere2,lumiere2)).value_or(0);
+
+                    if(t1>0 ){
+                        impactLumineuse = 0;
+
+                    }
+                    if(t2 > 0){
+                        impactLumineuse2 = 0;
+                    }
+
                     //float impactLumineuseSomme  = campMin(0,(impactLumineuse+impactLumineuse2));
 
-                    int calcul = (int) (   (1/(t*t) * ( impactLumineuse * 10000000 ) ));
-                    int calcul2 = (int) (   (1/(t*t) * ( impactLumineuse2 * 10000000 ) ));
-                    int finalCalcul =  clamp(0,255,calcul);
+                    int calcul = (int) (   (1/(t*t) * ( impactLumineuse * 5000000 ) ));
+                    int calcul2 = (int) (   (1/(t*t) * ( impactLumineuse2 * 5000000 ) ));
+
+                    if(calcul < 0){
+                        calcul = 0;
+                    }
+                    if(calcul2 < 0){
+                       calcul2 = 0;
+                    }
+                    int finalCalcul  = calcul + calcul2;
+
+                    finalCalcul =  clamp(0,255,finalCalcul);
                     c.setRgb( finalCalcul ,finalCalcul ,finalCalcul);
                 }else{
                     c.setRgb(0,0,0);
@@ -78,7 +99,6 @@ QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere, Point 
 }
 
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -86,8 +106,8 @@ int main(int argc, char *argv[])
     QImage image(1000,1000, QImage::Format_RGB888);
     QLabel myLabel(&w);
 
-    Sphere sphere(100,Point(500,150,400));
-    //Sphere sphere4(200,Point(250,250,400));
+    Sphere sphere(100,Point(400,300,200));
+    Sphere sphere4(200,Point(250,250,400));
     Sphere sphere1(100,Point(50,100,200));
     Sphere sphere3(100,Point(500,500,200));
 
@@ -96,9 +116,9 @@ int main(int argc, char *argv[])
     listSphere.push_back(sphere);
     listSphere.push_back(sphere1);
     listSphere.push_back(sphere3);
-    //listSphere.push_back(sphere4);
+    listSphere.push_back(sphere4);
 
-   image = setImage(image,listSphere, Point(250,300,400),Point(800,800,10));
+   image = setImage(image,listSphere, Point(400,0,0),Point(800,800,400));
    myLabel.setPixmap(QPixmap::fromImage(image));
    myLabel.setFixedHeight(1000);
    myLabel.setFixedWidth(1000);
@@ -106,8 +126,6 @@ int main(int argc, char *argv[])
     w.show();
     return a.exec();
 }
-
-
 
 
 float carre(float nb){
@@ -121,19 +139,14 @@ float carre(float nb){
     float t1;
 
     b = (2 * produitScalaire(rayonL.point,rayonL.direction)) -  (2 * produitScalaire(sphere.centre,rayonL.direction));
-
     c = produitScalaire(rayonL.point , rayonL.point) + produitScalaire(sphere.centre,sphere.centre) - (2 * produitScalaire(sphere.centre,rayonL.point)) - (sphere.rayon * sphere.rayon);
 
     float delta = (b*b) - (4*c);
 
     if(delta >= 0){
-
         t = (-b + sqrt(delta)) / 2;
-
         t1 = (-b -  sqrt(delta)) /2;
-
         float minT = fminf(t,t1);
-
         if(minT >= 0  ){
             return minT;
         }
