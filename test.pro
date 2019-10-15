@@ -16,16 +16,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    intersect.cpp \
+    light.cpp \
     main.cpp \
     mainwindow.cpp \
-    point.cpp \
-    rayonlumineux.cpp \
-    sphere.cpp
+    ray.cpp \
+    scene.cpp \
+    sphere.cpp \
+    vector3.cpp
 
 HEADERS += \
+    Vector3.h \
+    intersect.h \
+    light.h \
     mainwindow.h \
-    point.h \
-    rayonlumineux.h \
+    ray.h \
+    scene.h \
     sphere.h
 
 FORMS += \

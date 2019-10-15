@@ -1,82 +1,53 @@
 #include "mainwindow.h"
-
+#include <iostream>
 #include <QApplication>
 #include <QDebug>
 #include <sphere.h>
-#include <rayonlumineux.h>
+#include <ray.h>
 #include <math.h>
 #include <qimage.h>
 #include <QtGui>
 #include <qlabel.h>
 #include <optional>
-
+#include <light.h>
+#include "scene.h"
 
 using namespace std;
 
- optional<float>  intersection(Sphere sphere , RayonLumineux rayonL );
-float carre(float nb);
-
-
-float produitScalaire(Point a, Point b){
-   return  (a.x * b.x ) + (a.y * b.y) + (a.z * b.z);
-}
-
 int clamp(int min, int max, int value)
 {
-    if (value < min) return  min;
-    if (value > max) return  max;
+    if (value <= min) return  min;
+    if (value >= max) return  max;
     return value;
 }
 
-float campMin(int min, float value){
-    if(value < min ) return min;
-    return value;
-}
-
-Point soustraction(Point vecteur1, Point vecteur2){
-    return Point(vecteur2.x-vecteur1.x, vecteur2.y-vecteur1.y , vecteur2.z-vecteur1.z);
-}
-
-float norme(Point vecteur){
-    return sqrt(carre(vecteur.x) + carre(vecteur.y) + carre(vecteur.z) );
-}
-Point normalisation(Point vecteur){
-    return Point(vecteur.x / norme(vecteur),vecteur.y / norme(vecteur), vecteur.z / norme(vecteur) );
-}
-
-QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere, Point lumiere2){
- QColor c;
+/*
+QImage setImage(QImage image,std::list<Sphere> listSphere, Vector3 lumiere , Vector3 lumiere2 ){
+ QColor c;float mint= 1000000000.f;
     for(int i =0 ; i < 1000; ++i){
          for(int j =0 ; j < 1000; ++j){
+             c.setRgb(0,0,0);
             //qInfo() <<  i << "_" <<  j;
-            RayonLumineux rl(Point(0,0,1),Point(i,j,0));
-             for (std::list<Sphere>::iterator it=listSphere.begin(); it != listSphere.end(); ++it){
-                float t = intersection(*it,rl).value_or(0);
-                if(t > 0){
-                    Point intersectionv(i,j,t);
-                    Point vecteurVersLumire = normalisation( soustraction(intersectionv,lumiere ) );
+            Ray rl(Vector3(0,0,1),Vector3(i,j,0));
 
-                    Point vercteurNormal = normalisation(soustraction(it->centre ,intersectionv) );
-                    Point vecteurVersLumiere2 = normalisation( soustraction(intersectionv,lumiere2 ) );
+             mint= 1000000000.f;
+             for (std::list<Sphere>::iterator it=listSphere.begin(); it != listSphere.end(); ++it){
+
+                float t = intersection(*it,rl).value_or(0);
+
+                if(t > 0 && t<mint){
+                    mint = t;
+                    Vector3 intersectionv(i,j,t);
+                    Vector3 vecteurVersLumire = normalisation( soustraction(intersectionv,lumiere ) );
+
+                    Vector3 vercteurNormal = normalisation(soustraction(it->center ,intersectionv) );
+                    Vector3 vecteurVersLumiere2 = normalisation( soustraction(intersectionv,lumiere2 ));
 
                     float impactLumineuse = produitScalaire(vecteurVersLumire ,vercteurNormal);
                     float impactLumineuse2 = produitScalaire(vecteurVersLumiere2 ,vercteurNormal);
 
-                    float t1 = intersection(*it,RayonLumineux(vecteurVersLumire,lumiere)).value_or(0);
-                    float t2 = intersection(*it, RayonLumineux(vecteurVersLumiere2,lumiere2)).value_or(0);
-
-                    if(t1>0 ){
-                        impactLumineuse = 0;
-
-                    }
-                    if(t2 > 0){
-                        impactLumineuse2 = 0;
-                    }
-
-                    //float impactLumineuseSomme  = campMin(0,(impactLumineuse+impactLumineuse2));
-
-                    int calcul = (int) (   (1/(t*t) * ( impactLumineuse * 5000000 ) ));
-                    int calcul2 = (int) (   (1/(t*t) * ( impactLumineuse2 * 5000000 ) ));
+                    int calcul = (int) ( (1/(t*t) * ( impactLumineuse * 5000000 ) ));
+                    int calcul2 = (int) ( (1/(t*t) * ( impactLumineuse2 * 5000000 ) ));
 
                     if(calcul < 0){
                         calcul = 0;
@@ -84,62 +55,62 @@ QImage setImage(QImage image,std::list<Sphere> listSphere, Point lumiere, Point 
                     if(calcul2 < 0){
                        calcul2 = 0;
                     }
-                    int finalCalcul  = calcul + calcul2;
+                    if(calcul > 0 && calcul2 >0){
+                        cout << calcul << " + " << calcul2 << " = " << (calcul + calcul2) <<"\n";
+                    }
+                    int finalCalcul  = (calcul + calcul2);
+                    //cout << calcul << "+" << calcul2 << " = " << finalCalcul << "\n";
+                    //int finalCalcul  = calcul;
+
 
                     finalCalcul =  clamp(0,255,finalCalcul);
                     c.setRgb( finalCalcul ,finalCalcul ,finalCalcul);
-                }else{
-                    c.setRgb(0,0,0);
                 }
-                image.setPixelColor(i,j,image.pixelColor(i,j).rgb()+c.rgba());
-            }
+                image.setPixelColor(i,j,c.rgba());
+            } // fin de for
          }
     }
     return image;
 }
-
+*/
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
-    QImage image(1000,1000, QImage::Format_RGB888);
+    QImage image(400,400, QImage::Format_RGB32);
     QLabel myLabel(&w);
 
-    Sphere sphere(100,Point(400,300,200));
-    Sphere sphere4(200,Point(250,250,400));
-    Sphere sphere1(100,Point(50,100,200));
-    Sphere sphere3(100,Point(500,500,200));
+    Scene scene;
+    scene.add(Sphere(100, Vector3(0, 0, 200)));
+    scene.add(Sphere(70, Vector3(-150, -150, 400)));
+    scene.add(Sphere(30, Vector3(100, 50, 100)));
 
-    list<Sphere> listSphere;
+    scene.render(image);
 
-    listSphere.push_back(sphere);
-    listSphere.push_back(sphere1);
-    listSphere.push_back(sphere3);
-    listSphere.push_back(sphere4);
+    myLabel.setPixmap(QPixmap::fromImage(image));
+    myLabel.setFixedHeight(image.width());
+    myLabel.setFixedWidth(image.height());
 
-   image = setImage(image,listSphere, Point(400,0,0),Point(800,800,400));
-   myLabel.setPixmap(QPixmap::fromImage(image));
-   myLabel.setFixedHeight(1000);
-   myLabel.setFixedWidth(1000);
 
+    w.resize(image.width(), image.height());
     w.show();
     return a.exec();
 }
 
-
+/*
 float carre(float nb){
     return nb * nb;
 }
 
- optional<float>   intersection(Sphere sphere , RayonLumineux rayonL ){
+ optional<float>   intersection(Sphere sphere , Ray rayonL ){
     float b;
     float c;
     float t = 0;
     float t1;
 
-    b = (2 * produitScalaire(rayonL.point,rayonL.direction)) -  (2 * produitScalaire(sphere.centre,rayonL.direction));
-    c = produitScalaire(rayonL.point , rayonL.point) + produitScalaire(sphere.centre,sphere.centre) - (2 * produitScalaire(sphere.centre,rayonL.point)) - (sphere.rayon * sphere.rayon);
+    b = (2 * produitScalaire(rayonL.origin,rayonL.direction)) -  (2 * produitScalaire(sphere.center,rayonL.direction));
+    c = produitScalaire(rayonL.origin , rayonL.origin) + produitScalaire(sphere.center,sphere.center) - (2 * produitScalaire(sphere.center,rayonL.origin)) - (sphere.radius * sphere.radius);
 
     float delta = (b*b) - (4*c);
 
@@ -160,11 +131,7 @@ float carre(float nb){
 
 
 void genereRayon(){
-    RayonLumineux rl(Point(3,3,0),Point(1,4,0));
-    Sphere sphere(1,Point(6,2,5));
+    Ray rl(Vector3(3,3,0),Vector3(1,4,0));
+    Sphere sphere(1,Vector3(6,2,5));
 }
-
-
-
-
-
+*/

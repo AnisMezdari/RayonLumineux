@@ -1,0 +1,16 @@
+#ifndef LUMIERE_H
+#define LUMIERE_H
+
+#include <Vector3.h>
+#include <qimage.h>
+
+class Lumiere
+{
+public:
+    Vector3 vecteur;
+    QColor color;
+    Lumiere(Vector3 vecteur, QColor color);
+
+};
+
+#endif // LUMIERE_H

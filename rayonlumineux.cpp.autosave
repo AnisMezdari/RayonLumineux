@@ -1,0 +1,9 @@
+#include "rayonlumineux.h"
+#include "Vector3.h"
+
+RayonLumineux::RayonLumineux(Vector3 direction , Vector3 point) :  direction(0,0,0) , point(0,0,0)
+{
+    RayonLumineux::direction = direction;
+    RayonLumineux::point = point;
+}
+

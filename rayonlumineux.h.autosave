@@ -2,16 +2,16 @@
 #define RAYONLUMINEUX_H
 
 #include <direction.h>
-#include <point.h>
+#include <Vector3.h>
 
 class RayonLumineux
 {
     public:
 
-        Point direction;
-        Point point;
+        Vector3 direction;
+        Vector3 point;
 
-        RayonLumineux(Point direction ,  Point point);
+        RayonLumineux(Vector3 direction ,  Vector3 point);
 
 };
 
